@@ -1,9 +1,8 @@
+import { Link } from "react-router-dom";
 import { formatPrice } from "../utils/formatPrice";
-
-// Imagen de respaldo local si la URL externa falla
 import fallbackImg from "../assets/Header.jpg";
 
-const CardPizza = ({ name, price, ingredients, img }) => {
+const CardPizza = ({ id, name, price, ingredients, img }) => {
   return (
     <div className="card h-100 shadow-sm" style={{ maxWidth: "340px" }}>
       <img
@@ -12,7 +11,7 @@ const CardPizza = ({ name, price, ingredients, img }) => {
         className="card-img-top"
         style={{ height: "200px", objectFit: "cover" }}
         onError={(e) => {
-          e.target.onerror = null; // evitar loop infinito
+          e.target.onerror = null;
           e.target.src = fallbackImg;
         }}
       />
@@ -31,9 +30,12 @@ const CardPizza = ({ name, price, ingredients, img }) => {
         </p>
 
         <div className="d-flex gap-2 justify-content-between mt-auto">
-          <button className="btn btn-sm btn-outline-secondary flex-grow-1">
+          <Link
+            to={`/pizza/${id}`}
+            className="btn btn-sm btn-outline-secondary flex-grow-1"
+          >
             Ver Más »
-          </button>
+          </Link>
           <button className="btn btn-sm btn-dark flex-grow-1">
             Añadir 🛒
           </button>

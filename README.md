@@ -10,8 +10,9 @@ Proyecto incremental desarrollado con **React + Vite.js** como parte del curso F
 
 | Tecnología | Uso |
 |---|---|
-| React 19 | Librería principal de UI |
+| React 18 | Librería principal de UI |
 | Vite.js | Bundler y servidor de desarrollo |
+| React Router DOM v6 | Enrutamiento del lado del cliente |
 | Bootstrap 5 | Estilos base |
 | react-bootstrap | Componentes UI (Navbar, Form, Alert, Button) |
 | gh-pages | Despliegue en GitHub Pages |
@@ -24,18 +25,23 @@ Proyecto incremental desarrollado con **React + Vite.js** como parte del curso F
 mamma-mia/
 ├── src/
 │   ├── assets/
-│   │   └── Header.jpg              # Imagen de fondo del hero
+│   │   └── Header.jpg              # Imagen de fondo del hero (fallback)
 │   ├── components/
-│   │   ├── Navbar.jsx              # Barra de navegación dinámica (token, total)
+│   │   ├── Navbar.jsx              # Barra de navegación con Link de React Router
 │   │   ├── Header.jsx              # Hero con imagen de fondo, título y descripción
-│   │   ├── Home.jsx                # Página principal con las 3 pizzas
-│   │   ├── CardPizza.jsx           # Tarjeta de pizza (recibe props)
-│   │   ├── Footer.jsx              # Pie de página
-│   │   ├── LoginPage.jsx           # Formulario de login con validaciones (Hito 2)
-│   │   └── RegisterPage.jsx        # Formulario de registro con validaciones (Hito 2)
+│   │   ├── CardPizza.jsx           # Tarjeta de pizza con Link a /pizza/:id
+│   │   └── Footer.jsx              # Pie de página
+│   ├── pages/
+│   │   ├── Home.jsx                # Página principal con las pizzas (ruta /)
+│   │   ├── Login.jsx               # Formulario de login (ruta /login)
+│   │   ├── Register.jsx            # Formulario de registro (ruta /register)
+│   │   ├── Cart.jsx                # Carrito de compras (ruta /cart)
+│   │   ├── Pizza.jsx               # Detalle de pizza (ruta /pizza/:id)
+│   │   ├── Profile.jsx             # Perfil de usuario (ruta /profile)
+│   │   └── NotFound.jsx            # Página 404 (ruta /404)
 │   ├── utils/
 │   │   └── formatPrice.js          # Helper formato de precios CLP
-│   ├── App.jsx                     # Raíz: controla navegación con useState
+│   ├── App.jsx                     # Raíz: BrowserRouter + Routes
 │   └── main.jsx
 ├── vite.config.js
 └── package.json
@@ -43,43 +49,55 @@ mamma-mia/
 
 ---
 
-## 🔄 Flujo de navegación (Hito 2)
+## 🗺️ Rutas disponibles (Hito 5)
+
+| Ruta | Componente | Descripción |
+|---|---|---|
+| `/` | `Home` | Página principal con listado de pizzas |
+| `/login` | `Login` | Formulario de inicio de sesión |
+| `/register` | `Register` | Formulario de registro de usuario |
+| `/cart` | `Cart` | Carrito de compras |
+| `/pizza/:id` | `Pizza` | Detalle de una pizza (`p001`, `p002`, `p003`) |
+| `/profile` | `Profile` | Perfil del usuario con botón cerrar sesión |
+| `/404` | `NotFound` | Página no encontrada con enlace a inicio |
+| `*` | — | Redirige automáticamente a `/404` |
+
+---
+
+## 🔄 Flujo de navegación (Hito 5 — React Router)
 
 ```
-Inicio
-  └─► LoginPage
-        ├─► credenciales válidas  ──► Home (pizzas)
-        │                               └─► Logout ──► LoginPage
-        └─► "¿No tienes cuenta?" ──► RegisterPage
-                                          └─► registro exitoso ──► LoginPage
+Navbar (siempre visible)
+  ├─► /           →  Home (pizzas)
+  ├─► /login      →  Login
+  ├─► /register   →  Register
+  ├─► /profile    →  Profile
+  └─► /cart       ←  botón 🛒 Total: $xx.xxx
+
+Home
+  └─► CardPizza → "Ver Más »" → /pizza/:id
+
+Profile
+  └─► "Cerrar Sesión" → /login
+
+Ruta desconocida → /404 → enlace "Volver al inicio" → /
 ```
 
-### Lógica de páginas — App.jsx
-```
-page = "login"    →  muestra LoginPage
-page = "register" →  muestra RegisterPage  
-page = "home"     →  muestra Home con las pizzas
-```
+---
 
-### Lógica token — Navbar
-```
-token = false  →  muestra 🔐 Login y 🔐 Register
-token = true   →  muestra 🔓 Profile y 🔒 Logout
-🍕 Home y 🛒 Total  →  siempre visibles
-```
+## 🔄 Flujo de navegación (Hito 2 — Estado con useState)
 
 ### Validaciones formularios
 ```
-LoginPage:
+Login (/login):
   ✓ Campos obligatorios (email + password)
   ✓ Password mínimo 6 caracteres
-  ✓ Éxito → navega a Home
 
-RegisterPage:
+Register (/register):
   ✓ Campos obligatorios (email + password + confirmPassword)
   ✓ Password mínimo 6 caracteres
   ✓ Password === ConfirmPassword
-  ✓ Éxito → redirige a Login tras 1.5 seg
+  ✓ Éxito → muestra alerta de confirmación
 ```
 
 ---
@@ -110,8 +128,8 @@ npm run deploy
 |---|---|---|
 | App.jsx muestra Navbar, Home y Footer | 2 | ✅ |
 | Header.jsx con título y descripción llamado desde Home.jsx | 1 | ✅ |
-| Navbar.jsx con 6 opciones de navegación | 2 | ✅ |
-| Home y Total siempre visibles (independiente del token) | 2 | ✅ |
+| Navbar.jsx con opciones de navegación | 2 | ✅ |
+| Home y Total siempre visibles | 2 | ✅ |
 | CardPizza.jsx con props: name, price, ingredients, img | 2 | ✅ |
 | Footer.jsx con derechos reservados | 1 | ✅ |
 
@@ -122,13 +140,16 @@ npm run deploy
 | RegisterPage con email, password, confirmPassword + validaciones + mensaje éxito | 5 | ✅ |
 | LoginPage con email, password + validaciones + mensaje éxito | 5 | ✅ |
 
----
+### Hito 5 — React Router I (10 pts)
 
-## 📌 Próximos hitos
-
-- **Hito 3** — React Router (navegación real entre rutas)
-- **Hito 4** — Context API (estado global: carrito, autenticación)
-- **Hito 5** — Integración con APIs externas
+| Criterio | Pts | Estado |
+|---|---|---|
+| Instalación y configuración de React Router DOM | 2 | ✅ |
+| Componentes Home, Register, Login, Cart y Pizza trasladados a `pages/` | 1 | ✅ |
+| Rutas creadas: `/`, `/register`, `/login`, `/cart`, `/pizza/p001`, `/profile`, `/404` | 2 | ✅ |
+| Componente `NotFound` con enlace a `/` para rutas inexistentes | 2 | ✅ |
+| Componente `Profile` con email estático y botón cerrar sesión | 1 | ✅ |
+| Navbar con `Link` de React Router y botón total redirige a `/cart` | 2 | ✅ |
 
 ---
 
