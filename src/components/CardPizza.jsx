@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { formatPrice } from "../utils/formatPrice";
 import fallbackImg from "../assets/Header.jpg";
+import { useCart } from "../context/CartContext";
 
 const CardPizza = ({ id, name, price, ingredients, img }) => {
+  const { addToCart } = useCart();
   return (
     <div className="card h-100 shadow-sm" style={{ maxWidth: "340px" }}>
       <img
@@ -36,7 +38,10 @@ const CardPizza = ({ id, name, price, ingredients, img }) => {
           >
             Ver Más »
           </Link>
-          <button className="btn btn-sm btn-dark flex-grow-1">
+          <button
+            className="btn btn-sm btn-dark flex-grow-1"
+            onClick={() => addToCart({ id, name, price, ingredients, img })}
+          >
             Añadir 🛒
           </button>
         </div>

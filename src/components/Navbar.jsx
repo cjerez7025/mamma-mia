@@ -1,9 +1,10 @@
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { formatPrice } from "../utils/formatPrice";
+import { useCart } from "../context/CartContext";
 
 const NavBar = () => {
-  const total = 25000;
+  const { total } = useCart();
 
   return (
     <Navbar bg="dark" data-bs-theme="dark" sticky="top" className="shadow">
@@ -21,7 +22,7 @@ const NavBar = () => {
 
         <Nav>
           <Nav.Link as={Link} to="/cart">
-            🛒 Total: ${formatPrice(total)}
+            {`🛒 Total: $${formatPrice(total)}`}
           </Nav.Link>
         </Nav>
       </Container>

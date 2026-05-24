@@ -3,6 +3,7 @@ import "./App.css";
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import { CartProvider } from "./context/CartContext";
 import NavBar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -16,6 +17,7 @@ import NotFound from "./pages/NotFound";
 
 function App() {
   return (
+    <CartProvider>
     <BrowserRouter>
       <div className="d-flex flex-column min-vh-100">
         <NavBar />
@@ -34,6 +36,7 @@ function App() {
         <Footer />
       </div>
     </BrowserRouter>
+    </CartProvider>
   );
 }
 
