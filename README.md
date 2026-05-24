@@ -27,21 +27,23 @@ mamma-mia/
 │   ├── assets/
 │   │   └── Header.jpg              # Imagen de fondo del hero (fallback)
 │   ├── components/
-│   │   ├── Navbar.jsx              # Barra de navegación con Link de React Router
+│   │   ├── Navbar.jsx              # Barra de navegación — muestra total del carrito
 │   │   ├── Header.jsx              # Hero con imagen de fondo, título y descripción
-│   │   ├── CardPizza.jsx           # Tarjeta de pizza con Link a /pizza/:id
+│   │   ├── CardPizza.jsx           # Tarjeta de pizza con botón "Añadir al carrito"
 │   │   └── Footer.jsx              # Pie de página
+│   ├── context/
+│   │   └── CartContext.jsx         # Context API: estado global del carrito
 │   ├── pages/
 │   │   ├── Home.jsx                # Página principal con las pizzas (ruta /)
 │   │   ├── Login.jsx               # Formulario de login (ruta /login)
 │   │   ├── Register.jsx            # Formulario de registro (ruta /register)
-│   │   ├── Cart.jsx                # Carrito de compras (ruta /cart)
+│   │   ├── Cart.jsx                # Carrito de compras con tabla, cantidad y total
 │   │   ├── Pizza.jsx               # Detalle de pizza (ruta /pizza/:id)
 │   │   ├── Profile.jsx             # Perfil de usuario (ruta /profile)
 │   │   └── NotFound.jsx            # Página 404 (ruta /404)
 │   ├── utils/
 │   │   └── formatPrice.js          # Helper formato de precios CLP
-│   ├── App.jsx                     # Raíz: BrowserRouter + Routes
+│   ├── App.jsx                     # Raíz: CartProvider + BrowserRouter + Routes
 │   └── main.jsx
 ├── vite.config.js
 └── package.json
@@ -49,7 +51,7 @@ mamma-mia/
 
 ---
 
-## 🗺️ Rutas disponibles (Hito 5)
+## 🗺️ Rutas disponibles (Hito 6)
 
 | Ruta | Componente | Descripción |
 |---|---|---|
@@ -64,28 +66,24 @@ mamma-mia/
 
 ---
 
-## 🔄 Flujo de navegación (Hito 5 — React Router)
+## 🔄 Flujo de navegación y carrito (Hito 6)
 
 ```
-Navbar (siempre visible)
-  ├─► /           →  Home (pizzas)
-  ├─► /login      →  Login
-  ├─► /register   →  Register
-  ├─► /profile    →  Profile
-  └─► /cart       ←  botón 🛒 Total: $xx.xxx
-
-Home
-  └─► CardPizza → "Ver Más »" → /pizza/:id
-
-Profile
-  └─► "Cerrar Sesión" → /login
-
-Ruta desconocida → /404 → enlace "Volver al inicio" → /
+CartProvider (estado global del carrito)
+  └─► BrowserRouter
+        └─► Navbar (siempre visible — muestra total actualizado en tiempo real)
+              ├─► /           →  Home
+              │     └─► CardPizza → "Añadir 🛒" → agrega al carrito
+              │     └─► CardPizza → "Ver Más »" → /pizza/:id
+              ├─► /login      →  Login
+              ├─► /register   →  Register
+              ├─► /profile    →  Profile
+              └─► /cart       →  Carrito
+                    ├─► tabla con items, cantidad y subtotal por pizza
+                    ├─► botón [+] → incrementa cantidad
+                    ├─► botón [-] → decrementa / elimina item
+                    └─► Total = mismo valor que Navbar
 ```
-
----
-
-## 🔄 Flujo de navegación (Hito 2 — Estado con useState)
 
 ### Validaciones formularios
 ```
@@ -150,6 +148,16 @@ npm run deploy
 | Componente `NotFound` con enlace a `/` para rutas inexistentes | 2 | ✅ |
 | Componente `Profile` con email estático y botón cerrar sesión | 1 | ✅ |
 | Navbar con `Link` de React Router y botón total redirige a `/cart` | 2 | ✅ |
+
+### Hito 6 — Context API (10 pts)
+
+| Criterio | Pts | Estado |
+|---|---|---|
+| `CartContext` con `CartProvider` que maneja el estado global del carrito | 2 | ✅ |
+| Navbar consume `CartContext` y muestra el precio total actualizado | 2 | ✅ |
+| Botón "Añadir" en `CardPizza` agrega productos al carrito vía `CartContext` | 2 | ✅ |
+| Página `Cart` muestra productos del carrito, permite agregar y eliminar con `CartContext` | 2 | ✅ |
+| Total de la compra calculado en `CartContext`, igual en `Cart` y en `Navbar` | 2 | ✅ |
 
 ---
 
