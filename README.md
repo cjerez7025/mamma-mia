@@ -107,7 +107,7 @@ Register (/register):
 npm install
 
 # Servidor de desarrollo
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173/mamma-mia/
 
 # Build de producción
 npm run build
@@ -115,6 +115,47 @@ npm run build
 # Publicar en GitHub Pages
 npm run deploy
 ```
+
+---
+
+## ⚠️ Consideraciones para GitHub Pages (próximos hitos)
+
+Para que la app se vea correctamente en GitHub Pages y no aparezca en blanco, verificar estos 3 puntos antes de cada deploy:
+
+### 1. `vite.config.js` — base del repositorio
+
+```js
+export default defineConfig({
+  plugins: [react()],
+  base: '/mamma-mia/',   // debe coincidir exactamente con el nombre del repo en GitHub
+})
+```
+
+### 2. `App.jsx` — basename en BrowserRouter
+
+```jsx
+// ✅ Correcto — usa la variable BASE_URL de Vite
+<BrowserRouter basename={import.meta.env.BASE_URL}>
+
+// ❌ Incorrecto — sin basename, ninguna ruta coincide en GitHub Pages
+<BrowserRouter>
+```
+
+> `import.meta.env.BASE_URL` toma automáticamente el valor de `base` en `vite.config.js`,
+> tanto en desarrollo (`/mamma-mia/`) como en producción.
+
+### 3. `gh-pages` instalado y secuencia de deploy
+
+```bash
+# Solo la primera vez (o si se clona el repo):
+npm install --save-dev gh-pages
+
+# Siempre antes de deploy: hacer build primero
+npm run build
+npm run deploy
+```
+
+> Después del deploy, esperar 1–2 minutos y recargar la URL de GitHub Pages.
 
 ---
 

@@ -18,7 +18,7 @@ import NotFound from "./pages/NotFound";
 function App() {
   return (
     <CartProvider>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="d-flex flex-column min-vh-100">
         <NavBar />
 
