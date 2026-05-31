@@ -21,59 +21,67 @@ Proyecto incremental desarrollado con **React + Vite.js** como parte del curso F
 
 ## 📁 Estructura del proyecto
 
+### Frontend (`src/`)
+
 ```
 mamma-mia/
-├── backend/                        # API REST (Express + JWT) — puerto 5000
-│   ├── controllers/
-│   │   ├── auth.controller.js      # Lógica de login, register y me
-│   │   ├── checkout.controller.js  # Lógica de checkout (requiere JWT)
-│   │   └── pizza.controller.js     # Lógica de listado y detalle de pizzas
-│   ├── db/
-│   │   ├── pizzas.json             # Base de datos de pizzas (6 registros)
-│   │   └── users.json              # Base de datos de usuarios registrados
-│   ├── middlewares/
-│   │   └── auth.middleware.js      # Validación de JWT en rutas protegidas
-│   ├── models/
-│   │   ├── auth.model.js           # Acceso a datos de usuarios
-│   │   └── pizza.model.js          # Acceso a datos de pizzas
-│   ├── routes/
-│   │   ├── auth.route.js           # POST /api/auth/login|register, GET /api/auth/me
-│   │   ├── checkout.route.js       # POST /api/checkouts (protegida)
-│   │   └── pizza.route.js          # GET /api/pizzas, GET /api/pizzas/:id
-│   ├── utils/validators/
-│   │   └── email.validate.js       # Validador de formato de email
-│   ├── .env                        # JWT_SECRET
-│   ├── index.js                    # Entrada del servidor Express
-│   └── package.json
 ├── src/
 │   ├── assets/
-│   │   └── Header.jpg              # Imagen de fondo del hero (fallback)
+│   │   └── Header.jpg
 │   ├── components/
-│   │   ├── Navbar.jsx              # Navbar condicional según token (login/logout)
-│   │   ├── Header.jsx              # Hero con imagen de fondo, título y descripción
-│   │   ├── CardPizza.jsx           # Tarjeta de pizza con botón "Añadir al carrito"
-│   │   ├── ProtectedRoute.jsx      # PrivateRoute y PublicRoute para rutas protegidas
-│   │   └── Footer.jsx              # Pie de página
+│   │   ├── CardPizza.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Header.jsx
+│   │   ├── Navbar.jsx
+│   │   └── ProtectedRoute.jsx
 │   ├── context/
-│   │   ├── CartContext.jsx         # Context API: estado global del carrito
-│   │   └── UserContext.jsx         # Context API: token JWT real + email + login/logout
+│   │   ├── CartContext.jsx
+│   │   └── UserContext.jsx
 │   ├── pages/
-│   │   ├── Home.jsx                # Página principal — fetch GET /api/pizzas
-│   │   ├── Login.jsx               # Formulario de login — POST /api/auth/login
-│   │   ├── Register.jsx            # Formulario de registro — POST /api/auth/register
-│   │   ├── Cart.jsx                # Carrito con tabla, cantidades y botón Pagar
-│   │   ├── Pizza.jsx               # Detalle de pizza — fetch GET /api/pizzas/:id
-│   │   ├── Profile.jsx             # Perfil — ruta privada, muestra email real
-│   │   └── NotFound.jsx            # Página 404 (ruta /404)
+│   │   ├── Cart.jsx
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   ├── NotFound.jsx
+│   │   ├── Pizza.jsx
+│   │   ├── Profile.jsx
+│   │   └── Register.jsx
 │   ├── services/
-│   │   ├── auth.service.js         # loginUser(), registerUser() — centraliza fetch auth
-│   │   └── pizza.service.js        # getPizzas(), getPizza(id) — centraliza fetch pizzas
+│   │   ├── auth.service.js
+│   │   └── pizza.service.js
 │   ├── utils/
-│   │   ├── constants.js            # API_URL centralizada (http://localhost:5000)
-│   │   └── formatPrice.js          # Helper formato de precios CLP
-│   ├── App.jsx                     # Raíz: UserProvider + CartProvider + rutas protegidas
+│   │   ├── constants.js
+│   │   └── formatPrice.js
+│   ├── App.jsx
 │   └── main.jsx
 ├── vite.config.js
+└── package.json
+```
+
+### Backend (`backend/`)
+
+```
+backend/
+├── controllers/
+│   ├── auth.controller.js
+│   ├── checkout.controller.js
+│   └── pizza.controller.js
+├── db/
+│   ├── pizzas.json
+│   └── users.json
+├── middlewares/
+│   └── auth.middleware.js
+├── models/
+│   ├── auth.model.js
+│   └── pizza.model.js
+├── routes/
+│   ├── auth.route.js
+│   ├── checkout.route.js
+│   └── pizza.route.js
+├── utils/
+│   └── validators/
+│       └── email.validate.js
+├── .env
+├── index.js
 └── package.json
 ```
 
