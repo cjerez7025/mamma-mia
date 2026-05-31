@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+
+const API_URL = "http://localhost:5000";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { login } = useUser();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess(false);
     setError("");
 
     if (!email || !password || !confirmPassword) {
@@ -29,10 +33,25 @@ const Register = () => {
       return;
     }
 
-    setSuccess(true);
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Error al registrarse.");
+        return;
+      }
+      login(data.token, data.email);
+      navigate("/");
+    } catch {
+      setError("No se pudo conectar con el servidor. ¿Está el backend corriendo?");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,12 +65,6 @@ const Register = () => {
         {error && (
           <Alert variant="danger" onClose={() => setError("")} dismissible>
             {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert variant="success">
-            ¡Registro exitoso!
           </Alert>
         )}
 
@@ -86,8 +99,8 @@ const Register = () => {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit" className="me-2">
-            Register
+          <Button variant="primary" type="submit" disabled={loading} className="me-2">
+            {loading ? "Registrando..." : "Register"}
           </Button>
           <Link to="/login" className="btn btn-link">
             ¿Ya tienes cuenta? Inicia sesión

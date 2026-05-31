@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+
+const API_URL = "http://localhost:5000";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useUser();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -19,6 +25,26 @@ const Login = () => {
     if (password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres.");
       return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Error al iniciar sesión.");
+        return;
+      }
+      login(data.token, data.email);
+      navigate("/");
+    } catch {
+      setError("No se pudo conectar con el servidor. ¿Está el backend corriendo?");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,8 +83,8 @@ const Login = () => {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit" className="me-2">
-            Login
+          <Button variant="primary" type="submit" disabled={loading} className="me-2">
+            {loading ? "Iniciando sesión..." : "Login"}
           </Button>
           <Link to="/register" className="btn btn-link">
             ¿No tienes cuenta? Regístrate

@@ -1,40 +1,51 @@
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Spinner } from "react-bootstrap";
 import { formatPrice } from "../utils/formatPrice";
 import fallbackImg from "../assets/Header.jpg";
+import { useCart } from "../context/CartContext";
 
-const pizzas = {
-  p001: {
-    name: "Napolitana",
-    price: 5950,
-    ingredients: ["mozzarella", "tomates", "jamón", "orégano"],
-    img: "https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fpizza-1239077_640_cl.jpg?alt=media&token=6a9a33da-5c00-49d4-9080-784dcc87ec2c",
-    description: "Clásica pizza napolitana con los mejores ingredientes frescos.",
-  },
-  p002: {
-    name: "Española",
-    price: 6950,
-    ingredients: ["mozzarella", "gorgonzola", "parmesano", "provolone"],
-    img: "https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fcheese-164872_640_com.jpg?alt=media&token=18b2b821-4d0d-43f2-a1c6-8c57bc388fab",
-    description: "Una explosión de quesos seleccionados de España.",
-  },
-  p003: {
-    name: "Pepperoni",
-    price: 6950,
-    ingredients: ["mozzarella", "pepperoni", "orégano"],
-    img: "https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fpizza-1239077_640_com.jpg?alt=media&token=e7cde87a-08d5-4040-ac54-90f6c31eb3e3",
-    description: "La favorita de todos con abundante pepperoni.",
-  },
-};
+const API_URL = "http://localhost:5000";
 
 const Pizza = () => {
   const { id } = useParams();
-  const pizza = pizzas[id];
+  const { addToCart } = useCart();
+  const [pizza, setPizza] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!pizza) {
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    fetch(`${API_URL}/api/pizzas/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("No encontrada");
+        return res.json();
+      })
+      .then((data) => {
+        setPizza(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Container className="py-5 text-center">
+        <Spinner animation="border" variant="dark" />
+        <p className="mt-3 text-muted">Cargando pizza...</p>
+      </Container>
+    );
+  }
+
+  if (error || !pizza) {
     return (
       <Container className="py-5 text-center">
         <h2>Pizza no encontrada</h2>
+        <p className="text-muted">No se pudo cargar la información.</p>
       </Container>
     );
   }
@@ -58,8 +69,13 @@ const Pizza = () => {
           <p className="small text-muted">
             <strong>Ingredientes:</strong> {pizza.ingredients.join(", ")}
           </p>
-          <p className="fs-5 fw-bold">Precio: ${formatPrice(pizza.price)}</p>
-          <Button variant="dark">Añadir al carrito 🛒</Button>
+          <p className="fs-5 fw-bold">{`Precio: $${formatPrice(pizza.price)}`}</p>
+          <Button
+            variant="dark"
+            onClick={() => addToCart({ id: pizza.id, name: pizza.name, price: pizza.price, img: pizza.img, ingredients: pizza.ingredients })}
+          >
+            Añadir al carrito 🛒
+          </Button>
         </div>
       </div>
     </Container>

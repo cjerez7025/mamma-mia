@@ -27,23 +27,25 @@ mamma-mia/
 │   ├── assets/
 │   │   └── Header.jpg              # Imagen de fondo del hero (fallback)
 │   ├── components/
-│   │   ├── Navbar.jsx              # Barra de navegación — muestra total del carrito
+│   │   ├── Navbar.jsx              # Navbar condicional según token (login/logout)
 │   │   ├── Header.jsx              # Hero con imagen de fondo, título y descripción
 │   │   ├── CardPizza.jsx           # Tarjeta de pizza con botón "Añadir al carrito"
+│   │   ├── ProtectedRoute.jsx      # PrivateRoute y PublicRoute para rutas protegidas
 │   │   └── Footer.jsx              # Pie de página
 │   ├── context/
-│   │   └── CartContext.jsx         # Context API: estado global del carrito
+│   │   ├── CartContext.jsx         # Context API: estado global del carrito
+│   │   └── UserContext.jsx         # Context API: token de sesión + logout
 │   ├── pages/
 │   │   ├── Home.jsx                # Página principal con las pizzas (ruta /)
-│   │   ├── Login.jsx               # Formulario de login (ruta /login)
-│   │   ├── Register.jsx            # Formulario de registro (ruta /register)
-│   │   ├── Cart.jsx                # Carrito de compras con tabla, cantidad y total
-│   │   ├── Pizza.jsx               # Detalle de pizza (ruta /pizza/:id)
-│   │   ├── Profile.jsx             # Perfil de usuario (ruta /profile)
+│   │   ├── Login.jsx               # Formulario de login — ruta pública
+│   │   ├── Register.jsx            # Formulario de registro — ruta pública
+│   │   ├── Cart.jsx                # Carrito con tabla, cantidades y botón Pagar
+│   │   ├── Pizza.jsx               # Detalle de pizza con fetch a la API
+│   │   ├── Profile.jsx             # Perfil — ruta privada, botón logout
 │   │   └── NotFound.jsx            # Página 404 (ruta /404)
 │   ├── utils/
 │   │   └── formatPrice.js          # Helper formato de precios CLP
-│   ├── App.jsx                     # Raíz: CartProvider + BrowserRouter + Routes
+│   ├── App.jsx                     # Raíz: UserProvider + CartProvider + rutas protegidas
 │   └── main.jsx
 ├── vite.config.js
 └── package.json
@@ -51,38 +53,48 @@ mamma-mia/
 
 ---
 
-## 🗺️ Rutas disponibles (Hito 6)
+## 🗺️ Rutas disponibles (Hito 7)
 
-| Ruta | Componente | Descripción |
-|---|---|---|
-| `/` | `Home` | Página principal con listado de pizzas |
-| `/login` | `Login` | Formulario de inicio de sesión |
-| `/register` | `Register` | Formulario de registro de usuario |
-| `/cart` | `Cart` | Carrito de compras |
-| `/pizza/:id` | `Pizza` | Detalle de una pizza (`p001`, `p002`, `p003`) |
-| `/profile` | `Profile` | Perfil del usuario con botón cerrar sesión |
-| `/404` | `NotFound` | Página no encontrada con enlace a inicio |
-| `*` | — | Redirige automáticamente a `/404` |
+| Ruta | Componente | Tipo | Descripción |
+|---|---|---|---|
+| `/` | `Home` | Pública | Página principal con listado de pizzas |
+| `/login` | `Login` | Pública* | Formulario de login — redirige a `/` si hay token |
+| `/register` | `Register` | Pública* | Formulario de registro — redirige a `/` si hay token |
+| `/cart` | `Cart` | Pública | Carrito de compras — botón Pagar deshabilitado sin token |
+| `/pizza/:id` | `Pizza` | Pública | Detalle de pizza con fetch a la API |
+| `/profile` | `Profile` | **Privada** | Perfil — redirige a `/login` si no hay token |
+| `/404` | `NotFound` | Pública | Página no encontrada con enlace a inicio |
+| `*` | — | — | Redirige automáticamente a `/404` |
 
 ---
 
-## 🔄 Flujo de navegación y carrito (Hito 6)
+## 🔄 Flujo de navegación y autenticación (Hito 7)
 
 ```
-CartProvider (estado global del carrito)
-  └─► BrowserRouter
-        └─► Navbar (siempre visible — muestra total actualizado en tiempo real)
-              ├─► /           →  Home
-              │     └─► CardPizza → "Añadir 🛒" → agrega al carrito
-              │     └─► CardPizza → "Ver Más »" → /pizza/:id
-              ├─► /login      →  Login
-              ├─► /register   →  Register
-              ├─► /profile    →  Profile
-              └─► /cart       →  Carrito
-                    ├─► tabla con items, cantidad y subtotal por pizza
-                    ├─► botón [+] → incrementa cantidad
-                    ├─► botón [-] → decrementa / elimina item
-                    └─► Total = mismo valor que Navbar
+UserProvider (token: true por defecto)
+  └─► CartProvider
+        └─► BrowserRouter
+              └─► Navbar
+                    ├─► token=true  → muestra: Home | Profile | 🛒 Total | [Logout]
+                    └─► token=false → muestra: Home | Login | Register | 🛒 Total
+
+Rutas protegidas:
+  /profile  → PrivateRoute  → si token=false redirige a /login
+  /login    → PublicRoute   → si token=true  redirige a /
+  /register → PublicRoute   → si token=true  redirige a /
+
+Flujo logout:
+  Navbar [Logout] o Profile [Cerrar Sesión]
+    → logout() → token=false → navigate("/login")
+    → Navbar cambia a Login/Register
+    → /profile queda bloqueado
+
+Flujo /pizza/:id:
+  CardPizza "Ver Más »" → /pizza/:id
+    → useParams() obtiene id
+    → fetch("http://localhost:5000/api/pizzas/{id}")
+    → muestra datos de la API
+    → botón "Añadir al carrito 🛒"
 ```
 
 ### Validaciones formularios
@@ -199,6 +211,16 @@ npm run deploy
 | Botón "Añadir" en `CardPizza` agrega productos al carrito vía `CartContext` | 2 | ✅ |
 | Página `Cart` muestra productos del carrito, permite agregar y eliminar con `CartContext` | 2 | ✅ |
 | Total de la compra calculado en `CartContext`, igual en `Cart` y en `Navbar` | 2 | ✅ |
+
+### Hito 7 — React Router II (10 pts)
+
+| Criterio | Pts | Estado |
+|---|---|---|
+| `useParams` en `Pizza.jsx` obtiene el id y realiza fetch a `GET /api/pizzas/:id` | 2 | ✅ |
+| `UserContext` con estado `token` (default `true`) y método `logout` que lo pone en `false` | 2 | ✅ |
+| Navbar usa `UserContext`: logout ejecuta `logout()`, muestra Profile/Logout o Login/Register según token | 2 | ✅ |
+| `Cart.jsx` usa `UserContext`: botón "Pagar" deshabilitado cuando `token === false` | 1 | ✅ |
+| Ruta `/profile` protegida (redirige a `/login` sin token); `/login` y `/register` redirigen a `/` con token | 3 | ✅ |
 
 ---
 

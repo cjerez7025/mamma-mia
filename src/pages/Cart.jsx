@@ -1,10 +1,12 @@
 import { Container, Table, Button } from "react-bootstrap";
 import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
 import { formatPrice } from "../utils/formatPrice";
 import fallbackImg from "../assets/Header.jpg";
 
 const Cart = () => {
   const { cart, addToCart, removeFromCart, total } = useCart();
+  const { token } = useUser();
 
   if (cart.length === 0) {
     return (
@@ -48,20 +50,8 @@ const Cart = () => {
               <td className="align-middle">{`$${formatPrice(item.price * item.quantity)}`}</td>
               <td className="align-middle">
                 <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline-success"
-                    onClick={() => addToCart(item)}
-                  >
-                    +
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
-                    onClick={() => removeFromCart(item.id)}
-                  >
-                    -
-                  </Button>
+                  <Button size="sm" variant="outline-success" onClick={() => addToCart(item)}>+</Button>
+                  <Button size="sm" variant="outline-danger" onClick={() => removeFromCart(item.id)}>-</Button>
                 </div>
               </td>
             </tr>
@@ -69,8 +59,15 @@ const Cart = () => {
         </tbody>
       </Table>
 
-      <div className="text-end mt-3">
-        <h4 className="fw-bold">{`Total: $${formatPrice(total)}`}</h4>
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <Button
+          variant="success"
+          disabled={!token}
+          title={!token ? "Debes iniciar sesión para pagar" : ""}
+        >
+          {token ? "Pagar 💳" : "Inicia sesión para pagar"}
+        </Button>
+        <h4 className="fw-bold mb-0">{`Total: $${formatPrice(total)}`}</h4>
       </div>
     </Container>
   );
