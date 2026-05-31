@@ -4,8 +4,7 @@ import { Container, Button, Spinner } from "react-bootstrap";
 import { formatPrice } from "../utils/formatPrice";
 import fallbackImg from "../assets/Header.jpg";
 import { useCart } from "../context/CartContext";
-
-const API_URL = "http://localhost:5000";
+import { getPizza } from "../services/pizza.service";
 
 const Pizza = () => {
   const { id } = useParams();
@@ -17,11 +16,7 @@ const Pizza = () => {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetch(`${API_URL}/api/pizzas/${id}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("No encontrada");
-        return res.json();
-      })
+    getPizza(id)
       .then((data) => {
         setPizza(data);
         setLoading(false);
@@ -65,7 +60,7 @@ const Pizza = () => {
             }}
           />
           <h2 className="fw-bold mb-2">Pizza {pizza.name}</h2>
-          <p className="text-muted">{pizza.description}</p>
+          <p className="text-muted">{pizza.desc}</p>
           <p className="small text-muted">
             <strong>Ingredientes:</strong> {pizza.ingredients.join(", ")}
           </p>

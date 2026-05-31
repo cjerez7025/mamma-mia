@@ -23,6 +23,28 @@ Proyecto incremental desarrollado con **React + Vite.js** como parte del curso F
 
 ```
 mamma-mia/
+├── backend/                        # API REST (Express + JWT) — puerto 5000
+│   ├── controllers/
+│   │   ├── auth.controller.js      # Lógica de login, register y me
+│   │   ├── checkout.controller.js  # Lógica de checkout (requiere JWT)
+│   │   └── pizza.controller.js     # Lógica de listado y detalle de pizzas
+│   ├── db/
+│   │   ├── pizzas.json             # Base de datos de pizzas (6 registros)
+│   │   └── users.json              # Base de datos de usuarios registrados
+│   ├── middlewares/
+│   │   └── auth.middleware.js      # Validación de JWT en rutas protegidas
+│   ├── models/
+│   │   ├── auth.model.js           # Acceso a datos de usuarios
+│   │   └── pizza.model.js          # Acceso a datos de pizzas
+│   ├── routes/
+│   │   ├── auth.route.js           # POST /api/auth/login|register, GET /api/auth/me
+│   │   ├── checkout.route.js       # POST /api/checkouts (protegida)
+│   │   └── pizza.route.js          # GET /api/pizzas, GET /api/pizzas/:id
+│   ├── utils/validators/
+│   │   └── email.validate.js       # Validador de formato de email
+│   ├── .env                        # JWT_SECRET
+│   ├── index.js                    # Entrada del servidor Express
+│   └── package.json
 ├── src/
 │   ├── assets/
 │   │   └── Header.jpg              # Imagen de fondo del hero (fallback)
@@ -34,16 +56,20 @@ mamma-mia/
 │   │   └── Footer.jsx              # Pie de página
 │   ├── context/
 │   │   ├── CartContext.jsx         # Context API: estado global del carrito
-│   │   └── UserContext.jsx         # Context API: token de sesión + logout
+│   │   └── UserContext.jsx         # Context API: token JWT real + email + login/logout
 │   ├── pages/
-│   │   ├── Home.jsx                # Página principal con las pizzas (ruta /)
-│   │   ├── Login.jsx               # Formulario de login — ruta pública
-│   │   ├── Register.jsx            # Formulario de registro — ruta pública
+│   │   ├── Home.jsx                # Página principal — fetch GET /api/pizzas
+│   │   ├── Login.jsx               # Formulario de login — POST /api/auth/login
+│   │   ├── Register.jsx            # Formulario de registro — POST /api/auth/register
 │   │   ├── Cart.jsx                # Carrito con tabla, cantidades y botón Pagar
-│   │   ├── Pizza.jsx               # Detalle de pizza con fetch a la API
-│   │   ├── Profile.jsx             # Perfil — ruta privada, botón logout
+│   │   ├── Pizza.jsx               # Detalle de pizza — fetch GET /api/pizzas/:id
+│   │   ├── Profile.jsx             # Perfil — ruta privada, muestra email real
 │   │   └── NotFound.jsx            # Página 404 (ruta /404)
+│   ├── services/
+│   │   ├── auth.service.js         # loginUser(), registerUser() — centraliza fetch auth
+│   │   └── pizza.service.js        # getPizzas(), getPizza(id) — centraliza fetch pizzas
 │   ├── utils/
+│   │   ├── constants.js            # API_URL centralizada (http://localhost:5000)
 │   │   └── formatPrice.js          # Helper formato de precios CLP
 │   ├── App.jsx                     # Raíz: UserProvider + CartProvider + rutas protegidas
 │   └── main.jsx
@@ -115,18 +141,21 @@ Register (/register):
 ## ⚙️ Instalación y uso
 
 ```bash
-# Instalar dependencias
+# --- Frontend (raíz del proyecto) ---
 npm install
-
-# Servidor de desarrollo
 npm run dev        # http://localhost:5173/mamma-mia/
 
-# Build de producción
+# Build y deploy a GitHub Pages
 npm run build
-
-# Publicar en GitHub Pages
 npm run deploy
+
+# --- Backend (en otra terminal) ---
+cd backend
+npm install
+npm start          # http://localhost:5000
 ```
+
+> Ambos servidores deben estar corriendo en paralelo para que Login, Register y el listado de pizzas funcionen correctamente en local.
 
 ---
 

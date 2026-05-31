@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-
-const API_URL = "http://localhost:5000";
+import { loginUser } from "../services/auth.service";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -29,20 +28,11 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Error al iniciar sesión.");
-        return;
-      }
+      const data = await loginUser(email, password);
       login(data.token, data.email);
       navigate("/");
-    } catch {
-      setError("No se pudo conectar con el servidor. ¿Está el backend corriendo?");
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }

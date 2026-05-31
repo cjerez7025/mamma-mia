@@ -1,47 +1,62 @@
+import { useState, useEffect } from "react";
+import { Spinner, Container } from "react-bootstrap";
 import Header from "../components/Header";
 import CardPizza from "../components/CardPizza";
+import { getPizzas } from "../services/pizza.service";
 
 const Home = () => {
+  const [pizzas, setPizzas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    getPizzas()
+      .then((data) => {
+        setPizzas(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <main>
       <Header />
 
-      <section className="container py-5">
+      <Container className="py-5">
         <h2 className="text-center fw-bold mb-4">Nuestras Pizzas</h2>
-        <div className="row g-4 justify-content-center">
 
-          <div className="col-12 col-sm-6 col-lg-4 d-flex justify-content-center">
-            <CardPizza
-              id="p001"
-              name="Napolitana"
-              price={5950}
-              ingredients={["mozzarella", "tomates", "jamón", "orégano"]}
-              img="https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fpizza-1239077_640_cl.jpg?alt=media&token=6a9a33da-5c00-49d4-9080-784dcc87ec2c"
-            />
+        {loading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="dark" />
+            <p className="mt-3 text-muted">Cargando pizzas...</p>
           </div>
+        )}
 
-          <div className="col-12 col-sm-6 col-lg-4 d-flex justify-content-center">
-            <CardPizza
-              id="p002"
-              name="Española"
-              price={6950}
-              ingredients={["mozzarella", "gorgonzola", "parmesano", "provolone"]}
-              img="https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fcheese-164872_640_com.jpg?alt=media&token=18b2b821-4d0d-43f2-a1c6-8c57bc388fab"
-            />
+        {error && (
+          <p className="text-center text-muted">
+            No se pudo cargar el menú. ¿Está el backend corriendo?
+          </p>
+        )}
+
+        {!loading && !error && (
+          <div className="row g-4 justify-content-center">
+            {pizzas.map((pizza) => (
+              <div key={pizza.id} className="col-12 col-sm-6 col-lg-4 d-flex justify-content-center">
+                <CardPizza
+                  id={pizza.id}
+                  name={pizza.name}
+                  price={pizza.price}
+                  ingredients={pizza.ingredients}
+                  img={pizza.img}
+                />
+              </div>
+            ))}
           </div>
-
-          <div className="col-12 col-sm-6 col-lg-4 d-flex justify-content-center">
-            <CardPizza
-              id="p003"
-              name="Pepperoni"
-              price={6950}
-              ingredients={["mozzarella", "pepperoni", "orégano"]}
-              img="https://firebasestorage.googleapis.com/v0/b/apis-varias-mias.appspot.com/o/pizzeria%2Fpizza-1239077_640_com.jpg?alt=media&token=e7cde87a-08d5-4040-ac54-90f6c31eb3e3"
-            />
-          </div>
-
-        </div>
-      </section>
+        )}
+      </Container>
     </main>
   );
 };
