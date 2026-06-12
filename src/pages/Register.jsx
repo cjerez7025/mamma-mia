@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import { registerUser } from "../services/auth.service";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -10,7 +9,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useUser();
+  const { register } = useUser();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -34,8 +33,7 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const data = await registerUser(email, password);
-      login(data.token, data.email);
+      await register(email, password);
       navigate("/");
     } catch (err) {
       setError(err.message);

@@ -87,7 +87,7 @@ backend/
 
 ---
 
-## 🗺️ Rutas disponibles (Hito 7)
+## 🗺️ Rutas disponibles (Hito 8)
 
 | Ruta | Componente | Tipo | Descripción |
 |---|---|---|---|
@@ -102,33 +102,40 @@ backend/
 
 ---
 
-## 🔄 Flujo de navegación y autenticación (Hito 7)
+## 🔄 Flujo de navegación y autenticación (Hito 8)
 
 ```
-UserProvider (token: true por defecto)
+UserProvider (token: null por defecto — autenticación real con JWT)
   └─► CartProvider
         └─► BrowserRouter
               └─► Navbar
-                    ├─► token=true  → muestra: Home | Profile | 🛒 Total | [Logout]
-                    └─► token=false → muestra: Home | Login | Register | 🛒 Total
+                    ├─► token≠null → muestra: Home | Profile | 🛒 Total | [Logout]
+                    └─► token=null → muestra: Home | Login | Register | 🛒 Total
+
+UserContext — métodos:
+  login(email, password)   → POST /api/auth/login   → guarda token + email en estado
+  register(email, password)→ POST /api/auth/register→ guarda token + email en estado
+  logout()                 → limpia token y email del estado
+  getProfile()             → GET /api/auth/me        → retorna perfil del usuario autenticado
 
 Rutas protegidas:
-  /profile  → PrivateRoute  → si token=false redirige a /login
-  /login    → PublicRoute   → si token=true  redirige a /
-  /register → PublicRoute   → si token=true  redirige a /
+  /profile  → PrivateRoute  → si token=null redirige a /login
+  /login    → PublicRoute   → si token≠null redirige a /
+  /register → PublicRoute   → si token≠null redirige a /
+
+Flujo login/register:
+  Login/Register form → login()/register() en UserContext
+    → fetch a /api/auth/login o /api/auth/register
+    → guarda JWT token + email → navigate("/")
 
 Flujo logout:
   Navbar [Logout] o Profile [Cerrar Sesión]
-    → logout() → token=false → navigate("/login")
-    → Navbar cambia a Login/Register
-    → /profile queda bloqueado
+    → logout() → token=null → navigate("/login")
 
-Flujo /pizza/:id:
-  CardPizza "Ver Más »" → /pizza/:id
-    → useParams() obtiene id
-    → fetch("http://localhost:5000/api/pizzas/{id}")
-    → muestra datos de la API
-    → botón "Añadir al carrito 🛒"
+Flujo checkout:
+  Cart [Pagar] → POST /api/checkouts con Authorization: Bearer <token>
+    → éxito → muestra mensaje de compra exitosa
+    → botón deshabilitado si no hay token
 ```
 
 ### Validaciones formularios
@@ -258,6 +265,19 @@ npm run deploy
 | Navbar usa `UserContext`: logout ejecuta `logout()`, muestra Profile/Logout o Login/Register según token | 2 | ✅ |
 | `Cart.jsx` usa `UserContext`: botón "Pagar" deshabilitado cuando `token === false` | 1 | ✅ |
 | Ruta `/profile` protegida (redirige a `/login` sin token); `/login` y `/register` redirigen a `/` con token | 3 | ✅ |
+
+### Hito 8 — Autenticación real con JWT (10 pts)
+
+| Criterio | Pts | Estado |
+|---|---|---|
+| `UserContext` implementa `login(email, password)` y `register(email, password)` consumiendo `/api/auth/login` y `/api/auth/register`, almacenando token y email en estado | 2 | ✅ |
+| `UserContext` implementa `logout()` que elimina token y email del estado | 1 | ✅ |
+| `UserContext` implementa `getProfile()` consumiendo `GET /api/auth/me` con token JWT | 1 | ✅ |
+| `Login.jsx` y `Register.jsx` usan los métodos de `UserContext` directamente | 2 | ✅ |
+| `Profile.jsx` muestra email del usuario autenticado y botón para cerrar sesión | 1 | ✅ |
+| Botón logout del Navbar cierra la sesión del usuario | 1 | ✅ |
+| `Cart.jsx` envía el carrito al backend consumiendo `POST /api/checkouts` con token JWT | 1 | ✅ |
+| `Cart.jsx` muestra mensaje de éxito cuando se realiza la compra | 1 | ✅ |
 
 ---
 

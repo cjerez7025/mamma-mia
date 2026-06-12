@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import { loginUser } from "../services/auth.service";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -28,8 +27,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const data = await loginUser(email, password);
-      login(data.token, data.email);
+      await login(email, password);
       navigate("/");
     } catch (err) {
       setError(err.message);
